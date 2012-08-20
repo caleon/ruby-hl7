@@ -523,6 +523,11 @@ class HL7::Message::Segment
       @child_types
     end
 
+    # @@child_types = child_types
+    # define_method(:child_types) do
+    #   @@child_types
+    # end
+
     self.class_eval do
       define_method(:children) do
         unless @my_children
