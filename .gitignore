@@ -3,3 +3,5 @@
 coverage
 doc
 pkg
+spec/tmp
+spec/tmp/*
