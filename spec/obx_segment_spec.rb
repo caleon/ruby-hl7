@@ -3,11 +3,11 @@ $: << '../lib'
 require 'ruby-hl7'
 
 describe HL7::Message::Segment::OBX do
-  context 'general' do
-    before :all do
-      @base = "OBX||TX|FIND^FINDINGS^L|1|This is a test on 05/02/94."
-    end
+  before :all do
+    @base = "OBX||TX|FIND^FINDINGS^L|1|This is a test on 05/02/94."
+  end
 
+  context 'general' do
     it 'allows access to an OBX segment' do
       obx = HL7::Message::Segment::OBX.new @base
       obx.set_id.should == ""
@@ -27,4 +27,5 @@ describe HL7::Message::Segment::OBX do
       end.should_not raise_error
     end
   end
+
 end

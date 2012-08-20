@@ -4,9 +4,10 @@ require 'ruby-hl7'
 
 RSpec.configure do |c|
   c.treat_symbols_as_metadata_keys_with_true_values = true
-  c.filter_run_excluding :broken => true
+  # c.filter_run_excluding :broken => true
 
   require File.expand_path('../support/hl7_helpers', __FILE__)
+  require File.expand_path('../support/hl7_shared_examples', __FILE__)
   c.extend HL7Helpers
 
   c.before(:all,  :embedded_tests) do
@@ -16,6 +17,7 @@ RSpec.configure do |c|
 
   c.before(:each, :embedded_tests) do
     write_hl7_composite_files!
+    @message = my_parse_with(test_hl7)
   end
 
   c.before(:each, :embedded_tests, :debug_hl7) do
@@ -74,10 +76,10 @@ describe HL7::Message, 'containing PDF data', :embedded_tests, :configured, :mes
       describe 'parent OBX of the ZEFs' do
         subject { segment }
 
-        # its(:children) { should_not be_empty }
-        # it 'should have children ZEFs with embedded data' do
-        #   segment.children.should be_any { |s| s.e0 == 'ZEF' } # check data.
-        # end
+        its(:children) { should_not be_empty }
+        it 'should have children ZEFs with embedded data' do
+          segment.children.should be_any { |s| s.e0 == 'ZEF' } # check data.
+        end
       end
 
       describe 'ZEF with embedded data', :segment => :ZEF, :variant => nil,

@@ -291,12 +291,16 @@ class HL7::Message
 
     @parsing = true
     last_seg = nil
+    @cumulative_segments = []
     ary.each do |elm|
       if elm.slice(0,3) == "MSH"
         @item_delim = parse_item_delim(elm)
         @element_delim = parse_element_delim(elm)
       end
-      last_seg = generate_segment( elm, last_seg ) || last_seg
+      if seg = generate_segment(elm, last_seg)
+        @cumulative_segments << seg
+        last_seg = seg
+      end
     end
     @parsing = nil
   end
@@ -321,10 +325,10 @@ class HL7::Message
       new_seg = kls.new( elm, [@element_delim, @item_delim] )
       new_seg.segment_parent = self
 
-      if last_seg && last_seg.respond_to?(:children) && last_seg.accepts?( seg_name )
-        last_seg.children << new_seg
+      if seg = @cumulative_segments.reverse.detect { |seg| seg.respond_to?(:children) && seg.accepts?(seg_name) }
+        seg.children << new_seg
         new_seg.is_child_segment = true
-        return last_seg
+        return new_seg
       end
 
       @segments << new_seg
@@ -373,7 +377,7 @@ class HL7::Message::Segment
   def initialize(raw_segment="", delims=[], &blk)
     @segments_by_name = {}
     @field_total = 0
-    @is_child = false
+    @is_child_segment = false
 
     @element_delim = (delims.kind_of?(Array) && delims.length>0) ? delims[0] : "|"
     @item_delim = (delims.kind_of?(Array) && delims.length>1) ? delims[1] : "^"
@@ -519,17 +523,14 @@ class HL7::Message::Segment
   # used to handle associated lists like one OBR to many OBX segments
   def self.has_children(child_types)
     @child_types = child_types
-    define_method(:child_types) do
-      @child_types
-    end
-
-    # @@child_types = child_types
-    # define_method(:child_types) do
-    #   @@child_types
-    # end
+    instance_eval { def child_types; @child_types; end }
 
     self.class_eval do
-      define_method(:children) do
+      define_method :child_types do
+        self.class.instance_variable_get(:@child_types)
+      end
+
+      define_method :children do
         unless @my_children
           p = self
           @my_children ||= []
@@ -556,7 +557,7 @@ class HL7::Message::Segment
         @my_children
       end
 
-      define_method('accepts?') do |t|
+      define_method :accepts? do |t|
         t = t.to_sym if t && (t.to_s.length > 0) && t.respond_to?(:to_sym)
         child_types.index t
       end
