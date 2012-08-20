@@ -6,10 +6,10 @@ RSpec.configure do |c|
   c.treat_symbols_as_metadata_keys_with_true_values = true
   c.filter_run_excluding :broken => true
 
-  require 'support/hl7_helpers'
+  require File.expand_path('../support/hl7_helpers', __FILE__)
   c.extend HL7Helpers
 
-  c.before(:each) do
+  c.before(:each, :embedded_tests) do
     if example.metadata[:segment]#, *example.metadata[:others]
       segment_keys  << [example.metadata[:segment],
                         example.metadata[:variant]].compact.join.to_sym
@@ -22,7 +22,7 @@ RSpec.configure do |c|
   end
 end
 
-describe HL7::Message, 'containing PDF data', :configured, :message do
+describe HL7::Message, 'containing PDF data', :embedded_tests, :configured, :message do
   let!(:names_array) { #{
     [[:MSH  , 'msh-common'],
      [:NTE3 , 'nte-thrice'],
