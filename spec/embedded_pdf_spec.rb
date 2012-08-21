@@ -4,7 +4,6 @@ require 'ruby-hl7'
 
 RSpec.configure do |c|
   c.treat_symbols_as_metadata_keys_with_true_values = true
-  # c.filter_run_excluding :broken => true
 
   require File.expand_path('../support/hl7_helpers', __FILE__)
   require File.expand_path('../support/hl7_shared_examples', __FILE__)
@@ -17,29 +16,11 @@ RSpec.configure do |c|
 
   c.before(:each, :embedded_tests) do
     write_hl7_composite_files!
-    @message = my_parse_with(test_hl7)
-  end
-
-  c.before(:each, :embedded_tests, :debug_hl7) do
-    puts "(Using composite hl7: #{test_hl7})"
+    @message = my_parse_with(test_hl7_file)
   end
 end
 
 describe HL7::Message, 'containing PDF data', :embedded_tests, :configured, :message do
-  class HL7::Message
-    def inspect
-      vars = self.instance_variables.map{|v| "#{v}=.."}.join(", ")
-      "<#{self.class}: #{vars}>"
-    end
-  end
-
-  class HL7::Message::Segment
-    def inspect
-      vars = self.instance_variables.map{|v| "#{v}=.."}.join(", ")
-      "<#{self.class}: #{vars}>"
-    end
-  end
-
   let!(:names_array) {
     [[:MSH  , 'msh-common'],
      [:NTE3 , 'nte-thrice'],
@@ -54,7 +35,7 @@ describe HL7::Message, 'containing PDF data', :embedded_tests, :configured, :mes
   let(:segment_keys)  { [:MSH, *example.metadata[:others]] }
   let(:ordered_keys)  { segment_keys.compact.sort_by { |k| names_array.map(&:first).index(k) } }
   let(:output_name)   { ordered_keys.map { |k| names[k] } * '-' }
-  let(:test_hl7)      { tmp_hl7(output_name) }
+  let(:test_hl7_file) { tmp_hl7_file(output_name) }
 
   it_should_behave_like 'a properly parsed Message'
 
@@ -75,7 +56,6 @@ describe HL7::Message, 'containing PDF data', :embedded_tests, :configured, :mes
 
       describe 'parent OBX of the ZEFs' do
         subject { segment }
-
         its(:children) { should_not be_empty }
         it 'should have children ZEFs with embedded data' do
           segment.children.should be_any { |s| s.e0 == 'ZEF' } # check data.
@@ -86,6 +66,7 @@ describe HL7::Message, 'containing PDF data', :embedded_tests, :configured, :mes
                                                         :others => [:OBXa] do
         let(:parent_obx) { message[:OBX] }
         subject { segment }
+
         context 'on one Segment', :variant => nil do
           specify { segments.should have(1).segment }
           its(:embedded_pdf) { should match /^JVBER.+U9GCg==$/ }

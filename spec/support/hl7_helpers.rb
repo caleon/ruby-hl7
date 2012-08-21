@@ -11,11 +11,11 @@ module HL7Helpers
     File.expand_path('./test_data/pdfs')
   end
 
-  def tmp_hl7(name)
-    hl7(name, tmp_path)
+  def tmp_hl7_file(name)
+    hl7_file(name, tmp_path)
   end
 
-  def hl7(name, dir = nil)
+  def hl7_file(name, dir = nil)
     File.join(dir || root_path, "#{name}.hl7")
   end
 
@@ -25,8 +25,8 @@ module HL7Helpers
                         example.metadata[:variant]].compact.join.to_sym
     end
 
-    File.exists?(test_hl7) or File.open(test_hl7,
-      'w') { |f| f.puts ordered_keys.map { |p| IO.read hl7(names[p]) }.compact }
+    File.exists?(test_hl7_file) or File.open(test_hl7_file,
+      'w') { |f| f.puts ordered_keys.map { |p| IO.read hl7_file(names[p]) }.compact }
   end
 
   def my_parse_with(path = nil)

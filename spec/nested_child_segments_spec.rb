@@ -100,13 +100,13 @@ describe 'nesting and children' do
                                              :segment => :OBX, :variant => :a do
         # include_context 'My intended method of parsing'
         before(:all) do
-          File.open(test_hl7, 'w') do |f|
-            f.puts ['msh-common', 'obx-attaching'].map { |p| IO.read hl7(p) }.compact
+          File.open(test_hl7_file, 'w') do |f|
+            f.puts ['msh-common', 'obx-attaching'].map { |p| IO.read hl7_file(p) }.compact
           end
-          @message = my_parse_with(test_hl7)
+          @message = my_parse_with(test_hl7_file)
         end
 
-        let(:test_hl7) { tmp_hl7('nc-msh-common-obx-attaching') }
+        let(:test_hl7_file) { tmp_hl7_file('nc-msh-common-obx-attaching') }
         let(:message) { @message }
         let(:obr) { message[:OBR] }
         let(:obx) { message[:OBX] }
@@ -149,13 +149,13 @@ describe 'nesting and children' do
         # include_context 'My intended method of parsing'
         before(:all) do
 
-          File.open(test_hl7, 'w') do |f|
-            f.puts ['msh-common', 'obx-attaching', 'zef'].map { |p| IO.read hl7(p) }.compact
+          File.open(test_hl7_file, 'w') do |f|
+            f.puts ['msh-common', 'obx-attaching', 'zef'].map { |p| IO.read hl7_file(p) }.compact
           end
-          @message = my_parse_with(test_hl7)
+          @message = my_parse_with(test_hl7_file)
         end
 
-        let(:test_hl7) { tmp_hl7('nc-msh-common-obx-attaching-zef') }
+        let(:test_hl7_file) { tmp_hl7_file('nc-msh-common-obx-attaching-zef') }
         let(:message) { @message }
         let(:obr) { message[:OBR] }
         let(:obx) { message[:OBX] }

@@ -5,7 +5,7 @@ end
 
 shared_context 'Taking a cue from existing examples', :alternate_parse do
   before(:each) do
-    content = File.read(test_hl7)
+    content = File.read(test_hl7_file)
     content = content.gsub("\n", "\r").gsub(/\r+/, "\r").sub(/[\s]+$/, '')
     @message = HL7::Message.parse(content)
   end
@@ -18,8 +18,8 @@ shared_context 'proper configuration', :configured do
 
   describe '[Setup]' do
     it 'dynamically wrote a composite HL7 file' do
-      test_hl7.should match /[-a-z0-9]{3,}\.hl7$/
-      File.should exist test_hl7
+      test_hl7_file.should match /[-a-z0-9]{3,}\.hl7$/
+      File.should exist test_hl7_file
     end
 
     it 'wrote a file containing validly parse-able blob' do
@@ -30,7 +30,6 @@ shared_context 'proper configuration', :configured do
 end
 
 shared_examples_for 'a properly parsed Message', :composite do
-
   it { should_not be_nil }
   it { should have_at_least(5).segments }
 
@@ -86,11 +85,6 @@ shared_examples_for 'OBX Segments within a proper Message', :segment => :OBX do
       message[:OBR].should_not be_nil
       message[:OBR].should be_a HL7::Message::Segment::OBR
     end
-
-    # Wrong.
-    # it 'should have an OBR as its @parental' do
-    #   segment.instance_variable_get(:@parental).should == message[:OBR]
-    # end
 
     its(:segment_parent) { should == message[:OBR] }
   end
